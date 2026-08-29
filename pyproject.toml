@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ai-field-delivery-toolkit"
+version = "1.14.0"
+description = "AI 项目现场交付工具包：FDE 现场部署的模块化武器箱"
+readme = "README.md"
+requires-python = ">=3.11"
+license = {text = "MIT"}
+authors = [
+    {name = "Your Name", email = "you@example.com"}
+]
+keywords = ["AI", "FDE", "RAG", "Agent", "Toolkit"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.11",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest",
+    "pytest-cov",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/yourname/ai-field-delivery-toolkit"
+"Bug Reports" = "https://github.com/yourname/ai-field-delivery-toolkit/issues"
+"Source" = "https://github.com/yourname/ai-field-delivery-toolkit"

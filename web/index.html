@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 项目现场交付工具包 · FDE 操作台</title>
+  <link rel="stylesheet" href="/style.css">
+</head>
+<body>
+  <!-- 顶栏：品牌 + 全局状态 -->
+  <header class="topbar">
+    <div class="topbar-inner">
+      <button id="menu-toggle" class="menu-toggle" type="button" aria-label="切换导航">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
+      </button>
+      <div class="topbar-breadcrumb">FDE 现场操作台 / <b>AI 交付工具包</b></div>
+      <div class="topbar-status">
+        <button id="health-btn" class="ghost" type="button">检查服务状态</button>
+        <div id="health-status" class="health"></div>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主体：侧边栏导航 + 主内容区 -->
+  <div class="layout">
+    <div class="sidebar-scrim" aria-hidden="true"></div>
+    <aside class="sidebar">
+      <div class="sidebar-caption"><b>AI 交付工具包</b><span>FDE 现场操作台</span></div>
+      <nav id="nav">
+        <button class="nav-item active" data-tab="tab-diagnosis">需求诊断</button>
+        <button class="nav-item" data-tab="tab-cropper">五步裁剪</button>
+        <button class="nav-item" data-tab="tab-dataprep">数据作战流</button>
+        <button class="nav-item" data-tab="tab-prototype">原型运行</button>
+        <button class="nav-item" data-tab="tab-deploy">部署配置</button>
+        <button class="nav-item" data-tab="tab-monitor">监控面板</button>
+        <button class="nav-item" data-tab="tab-flywheel">数据飞轮</button>
+        <button class="nav-item" data-tab="tab-projects">项目作战台</button>
+        <button class="nav-item" data-tab="tab-mapping">字段映射</button>
+        <button class="nav-item" data-tab="tab-manifests">功能说明</button>
+        <button class="nav-item" data-tab="tab-assets">资产库</button>
+      </nav>
+    </aside>
+
+    <main class="content">
+      <!-- 需求诊断（多 Agent 对抗一期） -->
+      <section id="tab-diagnosis" class="tab active">
+        <div class="page-head">
+          <h2>需求诊断 · 多 Agent 对抗评估</h2>
+          <p class="hint">Generator 打分 → Critic 盲审 → 人工复核 → Reviewer 再评分 → 强制确认定稿。分歧与置信度全程保留。过程分多次完成：刷新/下次继续用下面「历史诊断」。</p>
+        </div>
+
+        <!-- 历史诊断 / 继续执行 -->
+        <div class="panel">
+          <h3>历史诊断 / 继续执行（过程分多次，刷新不丢）</h3>
+          <button id="diag-history-btn" type="button" class="ghost">列出历史诊断</button>
+          <div id="diag-history-result" class="result"></div>
+        </div>
+
+        <!-- Step 1: 需求 + 提示词 -->
+        <form id="diag-form" class="panel">
+          <h3>输入需求（新诊断）</h3>
+          <div class="grid">
+            <label style="grid-column:1 / -1">客户需求描述（必填）
+              <textarea name="requirement" rows="4" placeholder="例如：为客户财务部门搭建基于内部报销文档的智能问答系统，回答需准确、数据在本地，用户约 200 人……"></textarea>
+            </label>
+          </div>
+          <details class="card" style="grid-column:1 / -1;border:none;padding:0;margin-bottom:12px">
+            <summary>评估提示词（点开展开 / 收起；默认严格中立，修改后报告标注「提示词已修改」）</summary>
+            <div style="padding:8px 0">
+              <textarea name="prompt" rows="8" id="diag-prompt" placeholder="提示词加载中…"></textarea>
+            </div>
+            <button id="diag-prompt-reset" type="button" class="ghost">恢复默认提示词</button>
+          </details>
+          <button type="submit">开始诊断（Generator + Critic 对抗）</button>
+        </form>
+        <div id="diag-result" class="result"></div>
+
+        <!-- Step 2: 人工复核 + AI 再评分 -->
+        <div id="diag-review" class="panel hidden">
+          <h3>人工复核打分 + Reviewer 再评分</h3>
+          <p class="hint">基于 Generator 结果调整分数并补充人工理由；提交后 Reviewer（盲审）会逐维评审人工打分并检测偏置。</p>
+          <div class="grid">
+            <label>生成性 <input type="number" name="rv_generation" min="1" max="5" value="3"></label>
+            <label>推理复杂度 <input type="number" name="rv_reasoning" min="1" max="5" value="3"></label>
+            <label>不确定性容忍度 <input type="number" name="rv_uncertainty" min="1" max="5" value="3"></label>
+            <label>数据可得性 <input type="number" name="rv_data" min="1" max="5" value="3"></label>
+            <label>实时性要求 <input type="number" name="rv_real_time" min="1" max="5" value="3"></label>
+          </div>
+          <h4>人工打分理由（可改写，留空则用 Generator 理由）</h4>
+          <div class="stack">
+            <label>生成性理由 <textarea name="rv_reason_generation" rows="3"></textarea></label>
+            <label>推理复杂度理由 <textarea name="rv_reason_reasoning" rows="3"></textarea></label>
+            <label>不确定性容忍度理由 <textarea name="rv_reason_uncertainty" rows="3"></textarea></label>
+            <label>数据可得性理由 <textarea name="rv_reason_data" rows="3"></textarea></label>
+            <label>实时性要求理由 <textarea name="rv_reason_real_time" rows="3"></textarea></label>
+          </div>
+          <div id="diag-clarify" class="grid"></div>
+          <label>人工复核总结 / 意见（可选）
+            <textarea name="rv_summary" rows="2"></textarea>
+          </label>
+          <button id="diag-review-submit" type="button" class="primary">提交人工打分，请 Reviewer 评审</button>
+          <div id="diag-review-result" class="result"></div>
+        </div>
+
+        <!-- Step 3: 定稿（强制确认） -->
+        <form id="diag-finalize-form" class="panel hidden">
+          <h3>确认并生成正式报告</h3>
+          <div class="grid">
+            <label>客户名称 <input type="text" name="customer_name" value=""></label>
+            <label>需求摘要 <input type="text" name="requirement_summary" value=""></label>
+            <label>访谈记录 <input type="text" name="interview_notes" value=""></label>
+            <label>验收人 <input type="text" name="decision_maker" value=""></label>
+          </div>
+          <label style="margin-bottom:10px;display:flex;gap:6px;align-items:center">
+            <input type="checkbox" name="confirmed" style="width:auto"> 我已人工确认此评估结果（不确认不能生成正式报告）
+          </label>
+          <button type="submit">生成正式报告</button>
+        </form>
+        <div id="diag-finalize-result" class="result"></div>
+
+        <!-- 二期：客户反馈 → 生成下一版 -->
+        <div id="diag-version-panel" class="panel hidden">
+          <h3>客户反馈 → 生成下一版</h3>
+          <p class="hint">把客户对当前版本的评估意见传回来，提炼为条目后增量重评，产出带变更清单的下一版。</p>
+          <form id="diag-feedback-form">
+            <div class="grid">
+              <label>上传客户评估反馈文件（txt/pdf）<input type="file" name="file" accept=".txt,.pdf"></label>
+              <label>或直接粘贴反馈文本<textarea name="text" rows="3" placeholder="客户返回的评估意见……"></textarea></label>
+            </div>
+            <button type="submit">提炼客户意见</button>
+          </form>
+          <div id="diag-feedback-result" class="result"></div>
+          <button id="diag-next-version" type="button" class="primary hidden">生成下一版</button>
+          <div id="diag-next-result" class="result"></div>
+        </div>
+
+        <!-- 档案 / 历史 -->
+        <div class="panel">
+          <h3>档案 / 历史</h3>
+          <button id="diag-runs-btn" type="button" class="ghost">列出最近诊断</button>
+          <div id="diag-runs-result" class="result"></div>
+        </div>
+
+        <!-- 案例 / 交付物（可打印 / 发客户） -->
+        <div class="panel">
+          <h3>案例 / 交付物（可打印 · 可发客户 · 可检索）</h3>
+          <button id="diag-case-create" type="button" class="primary">把当前诊断生成交付物</button>
+          <button id="diag-case-list" type="button" class="ghost">列出案例</button>
+          <form id="case-search-form" style="margin-top:8px">
+            <div class="grid">
+              <label>检索关键词 <input type="text" name="q" value=""></label>
+              <label>标签（逗号分隔） <input type="text" name="tags" value="诊断"></label>
+            </div>
+            <button type="submit">检索案例</button>
+          </form>
+          <div id="diag-case-result" class="result"></div>
+        </div>
+      </section>
+
+      <!-- 五步裁剪 -->
+      <section id="tab-cropper" class="tab">
+        <div class="page-head">
+          <h2>五步裁剪 · 客户约束 → 裁剪方案</h2>
+          <p class="hint">按客户约束（预算/硬件/环境/数据/用户/合规）五步裁剪出启用模块、删除模块、简化配置与排期建议。</p>
+        </div>
+        <form id="crop-form" class="panel">
+          <fieldset><legend>基础</legend>
+            <div class="grid">
+              <label>客户 ID <input type="text" name="customer_id" value="customer-001"></label>
+              <label>预算（元） <input type="number" name="budget" value="200000"></label>
+              <label>交付周期（周） <input type="number" name="timeline_weeks" value="2"></label>
+            </div>
+          </fieldset>
+          <fieldset><legend>硬件</legend>
+            <div class="grid">
+              <label>CPU <input type="text" name="hardware_cpu" value="8核"></label>
+              <label>内存 GB <input type="number" name="hardware_memory" value="32"></label>
+              <label>GPU <input type="text" name="hardware_gpu" placeholder="如 A100 或留空" value=""></label>
+              <label>存储 GB <input type="number" name="hardware_storage" value="500"></label>
+            </div>
+          </fieldset>
+          <fieldset><legend>环境</legend>
+            <div class="grid">
+              <label>OS <input type="text" name="env_os" value="ubuntu-22.04"></label>
+              <label>支持 Docker
+                <select name="env_docker"><option value="true" selected>是</option><option value="false">否</option></select>
+              </label>
+              <label>网络
+                <select name="env_network">
+                  <option value="internet">互联网</option>
+                  <option value="intranet-isolated" selected>内网隔离</option>
+                </select>
+              </label>
+              <label>外网访问
+                <select name="env_external"><option value="true">是</option><option value="false" selected>否</option></select>
+              </label>
+              <label>带宽 Mbps <input type="number" name="env_bandwidth" value="100"></label>
+            </div>
+          </fieldset>
+          <fieldset><legend>数据</legend>
+            <div class="grid">
+              <label>总数据量 <input type="number" name="data_records" value="300000"></label>
+              <label>日新增 <input type="number" name="data_daily" value="500"></label>
+              <label>格式（逗号分隔） <input type="text" name="data_formats" value="csv,json"></label>
+              <label>质量
+                <select name="data_quality"><option>clean</option><option>medium</option><option value="dirty" selected>dirty</option></select>
+              </label>
+            </div>
+          </fieldset>
+          <fieldset><legend>用户</legend>
+            <div class="grid">
+              <label>总用户 <input type="number" name="users_total" value="100"></label>
+              <label>并发峰值 <input type="number" name="users_peak" value="20"></label>
+            </div>
+          </fieldset>
+          <fieldset><legend>合规</legend>
+            <div class="grid">
+              <label>数据驻留
+                <select name="comp_residency"><option value="on-premise" selected>本地</option><option value="cloud">云</option></select>
+              </label>
+              <label>PII 敏感
+                <select name="comp_pii"><option value="true" selected>是</option><option value="false">否</option></select>
+              </label>
+              <label>合规等级
+                <select name="comp_level"><option value="standard" selected>standard</option><option value="strict">strict</option><option value="critical">critical</option></select>
+              </label>
+            </div>
+          </fieldset>
+          <button type="submit">生成裁剪方案</button>
+        </form>
+        <div id="crop-result" class="result"></div>
+
+        <div class="panel">
+          <h3>接线：诊断结论 → 裁剪预填（人工可改）</h3>
+          <form id="crop-from-diag-form">
+            <div class="grid">
+              <label>诊断 run_id <input type="text" name="run_id" placeholder="留空用最近一次诊断"></label>
+            </div>
+            <button type="submit">诊断结论带入裁剪</button>
+          </form>
+          <div id="crop-from-diag-result" class="result"></div>
+        </div>
+      </section>
+
+      <!-- 数据准备 -->
+      <section id="tab-dataprep" class="tab">
+        <div class="page-head">
+          <h2>数据准备 · 数据作战流（项目级 · 可断点续接 · 产物沉淀复用）</h2>
+          <p class="hint">以项目为单位：上传 csv/json 真实数据 → 自动跑 导入/清洗/质量 前三步；再按需继续 标注 → 评测集 → 知识库。各步产物真实落盘，刷新/重连不丢，可沉淀为可复用资产（案例检索可搜到）。</p>
+        </div>
+
+        <!-- 数据作战流（新增） -->
+        <div class="panel">
+          <h3>数据作战流</h3>
+          <div class="row">
+            <form id="dataprep-flow-create" class="panel half" style="margin:0">
+              <h4>新建数据作战流任务</h4>
+              <div class="grid">
+                <label>任务名 <input type="text" name="name" placeholder="如：制造业传感器预测性维护数据"></label>
+                <label>数据文件（csv/json 真实数据） <input type="file" name="file" accept=".csv,.json"></label>
+                <label>客户（按客户自动建/复用项目） <input type="text" name="customer" placeholder="如：某汽车制造厂"></label>
+                <label>项目 ID（可选，优先于客户） <input type="text" name="project_id" placeholder="留空则按客户自动建/复用"></label>
+              </div>
+              <button type="submit">上传并自动跑前 3 步</button>
+            </form>
+            <div class="panel half" style="margin:0">
+              <h4>任务列表（断点续接 · 刷新不丢）</h4>
+              <button id="dataprep-flow-list" type="button" class="ghost">列出数据作战流任务</button>
+              <div id="dataprep-flow-list-result" class="result"></div>
+            </div>
+          </div>
+          <div id="dataprep-related-assets" class="result"></div>
+          <div id="dataprep-flow-detail" class="result"></div>
+        </div>
+
+        <form id="dataprep-form" class="panel">
+          <div class="grid">
+            <label>数据文件 <input type="file" name="file" accept=".csv,.json,.pdf"></label>
+            <label>评测集样本数 <input type="number" name="eval_samples" value="100" min="1"></label>
+          </div>
+          <button type="submit">上传并运行</button>
+        </form>
+        <div id="dataprep-result" class="result"></div>
+
+        <div class="panel">
+          <h3>人工标注工作台 · 双人标注 → 一致性 → 评测集</h3>
+          <p class="hint">真实人工标注表面：每样本两列（标注员 A / 标注员 B）分别存标签，逐行显示一致性（未标 / 仅A / 仅B / 一致 / 分歧）；分歧样本单独列出可改标签重判。数据作战流「标注」步骤产出的是「规则自动打标」（流水线便利），要精标请从下方从数据作战流建任务。</p>
+          <div class="row">
+            <form id="ann-from-dataprep-form" class="panel half" style="margin:0">
+              <h4>从数据作战流建任务（人工标注样本源）</h4>
+              <div class="grid">
+                <label>数据作战流任务
+                  <select name="dataprep_run_id" id="ann-dataprep-runs"><option value="">（加载中…）</option></select>
+                </label>
+                <label>样本数 <input type="number" name="sample_size" value="20" min="1"></label>
+              </div>
+              <button type="submit">建人工标注任务</button>
+              <p class="hint">样本取该数据作战流「清洗后数据（cleaned_data）」产物前 N 条；规则打标产物保留在流水线侧（标「规则自动打标」），人工工作台是真实标注表面。</p>
+            </form>
+            <form id="ann-create-form" class="panel half" style="margin:0">
+              <h4>手动粘贴样本建任务</h4>
+              <div class="grid">
+                <label>任务名 <input type="text" name="name" value=""></label>
+                <label>待标注样本（每行一条）<textarea name="items" rows="4" placeholder="这是第一条样本&#10;这是第二条样本"></textarea></label>
+              </div>
+              <button type="submit">创建标注任务</button>
+            </form>
+          </div>
+          <p style="margin-top:8px"><button id="ann-list-btn" type="button" class="ghost">列出标注任务</button></p>
+          <div id="ann-list-result" class="result"></div>
+          <div id="ann-result" class="result"></div>
+        </div>
+
+        <div class="panel">
+          <h3>知识库分块 / 质检（RAG 最小件）</h3>
+          <p class="hint">数据作战流的「知识库」步骤分块后会自动索引（显示「已索引 · RAG 就绪」），即可到原型 tab 选该知识库做检索问答。此处为临时分块预览。</p>
+          <form id="kb-chunk-form">
+            <div class="grid">
+              <label>文档内容 <textarea name="text" rows="5" placeholder="粘贴长文档内容……"></textarea></label>
+              <label>分块大小 <input type="number" name="chunk_size" value="500"></label>
+              <label>重叠 <input type="number" name="overlap" value="50"></label>
+            </div>
+            <button type="submit">分块 + 质检</button>
+          </form>
+          <div id="kb-result" class="result"></div>
+        </div>
+      </section>
+
+      <!-- 原型运行 -->
+      <section id="tab-prototype" class="tab">
+        <div class="page-head">
+          <h2>原型组装 · Agent 模板（4 个模板全部真调 DeepSeek + RAG 知识库问答）</h2>
+          <p class="hint">四个模板均真调 DeepSeek（core/llm.py）：知识问答（可走 RAG 检索问答、回答带引用）、信息抽取（结构化抽取）、多步推理（Plan-Execute 分步求解）、反思型（先作答→反思修正）。知识库来自数据作战流的「知识库」步骤（自动索引，RAG 就绪）或下方手动索引。</p>
+        </div>
+        <form id="proto-form" class="panel">
+          <div class="grid">
+            <label>模板
+              <select name="template" id="proto-templates"></select>
+            </label>
+            <label>知识库（可选，走 RAG 检索问答）
+              <select name="kb_run_id" id="proto-kb"><option value="">（不使用知识库 / 普通问答）</option></select>
+            </label>
+            <label>用户输入 <input type="text" name="user_input" value="设备出现E001故障如何排查？"></label>
+            <label>项目 ID（可选，传入则过「数据未达标不进原型」门禁）
+              <input type="text" name="project_id" id="proto-project-id" placeholder="如：xxxxxx（可去项目作战台复制 project_id）">
+            </label>
+            <div id="proto-template-desc" class="hint" style="grid-column:1/-1"></div>
+          </div>
+          <div id="proto-gate-status" class="hint" style="margin-top:6px"></div>
+          <label style="margin-top:8px;display:flex;gap:6px;align-items:center">
+            <input type="checkbox" name="force" id="proto-force" disabled> 强制继续（人工勾选，跳过数据达标门禁；响应将诚实记录 gate_override）
+          </label>
+          <button type="submit" id="proto-run-btn" style="margin-top:8px">运行原型</button>
+        </form>
+        <div class="panel">
+          <h3>手动索引知识库分块（RAG 就绪）</h3>
+          <form id="retrieval-index-form">
+            <div class="grid">
+              <label>kb_run_id <input type="text" name="kb_run_id" placeholder="如：ops_manual_001（数据作战流 run_id 则自动读其分块产物）"></label>
+              <label>分块内容（每行一块，可选；留空则从数据作战流产物读取）<textarea name="chunks" rows="3" placeholder="每行一块知识库分块…"></textarea></label>
+            </div>
+            <button type="submit">索引进 ChromaDB</button>
+          </form>
+          <button id="retrieval-indexed-refresh" type="button" class="ghost" style="margin-top:8px">刷新已索引知识库列表</button>
+          <div id="retrieval-index-result" class="result"></div>
+        </div>
+        <div id="proto-result" class="result"></div>
+      </section>
+
+      <!-- 部署配置 -->
+      <section id="tab-deploy" class="tab">
+        <div class="page-head">
+          <h2>部署加固 · 生成部署配置</h2>
+          <p class="hint">生成降级预案 degradation.yaml + Dockerfile/compose 或 systemd 单元，并做环境变量预检。</p>
+        </div>
+        <form id="deploy-form" class="panel">
+          <div class="grid">
+            <label>部署模式
+              <select name="mode">
+                <option value="docker-compose" selected>docker-compose</option>
+                <option value="bare-metal">bare-metal（systemd）</option>
+              </select>
+            </label>
+            <label>镜像名 <input type="text" name="image_name" value="toolkit-app"></label>
+            <label>应用路径 <input type="text" name="app_path" value="/opt/toolkit"></label>
+          </div>
+          <button type="submit">生成部署配置</button>
+        </form>
+        <div id="deploy-result" class="result"></div>
+      </section>
+
+      <!-- 监控面板 -->
+      <section id="tab-monitor" class="tab">
+        <div class="page-head">
+          <h2>监控面板 · 指标 / 成本 / 告警</h2>
+          <p class="hint">全内存指标（含 token/成本追踪、按小时分桶）；3 条默认告警规则；看板 JSON。</p>
+        </div>
+        <div class="row">
+          <form id="monitor-record-form" class="panel half">
+            <h3>记录一次调用</h3>
+            <div class="grid">
+              <label>成功
+                <select name="success"><option value="true" selected>是</option><option value="false">否</option></select>
+              </label>
+              <label>延迟 ms <input type="number" name="latency_ms" value="120"></label>
+              <label>输入 token <input type="number" name="input_tokens" value="350"></label>
+              <label>输出 token <input type="number" name="output_tokens" value="150"></label>
+              <label>模型
+                <select name="model">
+                  <option>deepseek-chat</option><option>deepseek-reasoner</option>
+                  <option>qwen-turbo</option><option>qwen-plus</option><option>unknown</option>
+                </select>
+              </label>
+            </div>
+            <button type="submit">记录</button>
+          </form>
+          <div class="panel half">
+            <h3>操作</h3>
+            <button id="monitor-refresh" class="primary">刷新指标</button>
+            <p class="hint">指标保存在内存中，重启服务后清空。</p>
+          </div>
+        </div>
+        <div id="monitor-result" class="result"></div>
+      </section>
+
+      <!-- 数据飞轮 -->
+      <section id="tab-flywheel" class="tab">
+        <div class="page-head">
+          <h2>数据飞轮 · 反馈回流 → 资产</h2>
+          <p class="hint">反馈 → JSON 标注池 → 评测集更新 → 复用资产导出，形成数据闭环。</p>
+        </div>
+        <div class="row">
+          <form id="flywheel-feedback-form" class="panel half">
+            <h3>记录反馈</h3>
+            <div class="grid">
+              <label>请求 ID <input type="text" name="request_id" value="req-001"></label>
+              <label>类型
+                <select name="feedback_type">
+                  <option value="dislike" selected>dislike</option>
+                  <option value="audit_fail">audit_fail</option>
+                  <option value="low_confidence">low_confidence</option>
+                </select>
+              </label>
+              <label>用户输入 <input type="text" name="user_input" value="什么是RAG？"></label>
+              <label>模型输出 <input type="text" name="model_output" value="RAG是检索增强生成。"></label>
+              <label>备注 <input type="text" name="note" value=""></label>
+            </div>
+            <button type="submit">记录反馈</button>
+          </form>
+          <form id="flywheel-export-form" class="panel half">
+            <h3>导出可复用资产</h3>
+            <div class="grid">
+              <label>项目 ID <input type="text" name="project_id" value="project-001"></label>
+              <label>项目摘要 <input type="text" name="project_summary" value="研发知识库问答项目"></label>
+            </div>
+            <button type="submit">导出资产</button>
+            <button id="flywheel-pool" type="button" class="ghost">查看标注池</button>
+          </form>
+        </div>
+        <div id="flywheel-result" class="result"></div>
+      </section>
+
+      <!-- 项目作战台（v7.0：以项目为中心，全部产物真实拉齐） -->
+      <section id="tab-projects" class="tab">
+        <div class="page-head">
+          <h2>项目作战台 · 全部产物拉齐</h2>
+          <p class="hint">以项目为中心：诊断 / 数据作战流 / 映射 / 交付物 / 资产 / RAG 索引 / 工作流进度 / 时间线真实拉齐到一台。工具标签退为辅助入口，可带上下文跳转续做。</p>
+        </div>
+        <form id="project-create-form" class="panel">
+          <h3>创建项目</h3>
+          <div class="grid">
+            <label>项目名称 <input type="text" name="name" value=""></label>
+            <label>客户 <input type="text" name="customer" value=""></label>
+          </div>
+          <button type="submit">创建项目</button>
+        </form>
+        <div class="panel">
+          <h3>最近项目 <button id="project-list-btn" type="button" class="ghost" style="margin-left:8px">刷新</button></h3>
+          <div id="project-list-result" class="result"></div>
+        </div>
+        <div id="project-detail" class="result"></div>
+      </section>
+
+      <!-- 字段映射工作台 -->
+      <section id="tab-mapping" class="tab">
+        <div class="page-head">
+          <h2>字段映射工作台 · 集成工作流（导入真实样例 → 实跑校验 → 人工修正 → 导出）</h2>
+          <p class="hint">把真实源数据丢进去 → 映射实跑一遍 → 看到每条映射的实跑结果与正确性判断（pass/warn/fail + 理由）→ 修正 → 再跑，直到达标 → 导出适配器。任务按 run_id 存档，结果/样例/校验可断点续接。</p>
+        </div>
+
+        <div class="panel">
+          <h3>历史映射 / 继续（断点续接 · 刷新不丢）</h3>
+          <button id="mapping-runs-btn" type="button" class="ghost">列出历史映射</button>
+          <div id="mapping-runs-result" class="result"></div>
+        </div>
+
+        <form id="mapping-create-form" class="panel">
+          <h3>新建映射任务</h3>
+          <div class="grid">
+            <label>任务名 <input type="text" name="name" value=""></label>
+            <label>客户（按客户自动建/复用项目） <input type="text" name="customer" placeholder="如：某汽车制造厂"></label>
+            <label>项目 ID（可选，优先于客户） <input type="text" name="project_id" placeholder="留空则按客户自动建/复用"></label>
+            <label>样例数据（可选，CSV，列名=源字段名） <input type="file" name="sample_file" accept=".csv"></label>
+            <label>源字段（每行：字段名|示例值）<textarea name="source" rows="5" placeholder="customer_name|张三&#10;customer_phone|13812345678"></textarea></label>
+            <label>目标字段（每行：字段名|示例值）<textarea name="target" rows="5" placeholder="name|张三&#10;phone|13812345678"></textarea></label>
+          </div>
+          <button type="submit">创建并让 LLM 初判</button>
+        </form>
+        <div id="mapping-related-assets" class="result"></div>
+        <div id="mapping-result" class="result"></div>
+      </section>
+
+      <!-- 功能说明（manifest 自描述 + 分层 + 案例链接） -->
+      <section id="tab-manifests" class="tab">
+        <div class="page-head">
+          <h2>使用指南 · 动态建议 + 工作流 + 详细指南</h2>
+          <p class="hint">顶部「动态使用建议」根据当前状态告诉你下一步该做什么（可一键跳转）；工作流展示模块如何串成 FDE 交付链；每个模块有详细使用指南与依赖/流向。</p>
+        </div>
+        <button id="manifests-load" type="button" class="primary">加载使用指南</button>
+        <div id="manifests-result" class="result"></div>
+      </section>
+
+      <!-- 资产库（v6.0：项目越多、工具越强） -->
+      <section id="tab-assets" class="tab">
+        <div class="page-head">
+          <h2>资产库 · 可复用资产复用闭环</h2>
+          <p class="hint">映射配置 / 评测集 / 知识库分块 / 清洗规则 / 质量报告 / 诊断方案 沉淀后自动入库。新任务启动自动带出相关资产，点「一键接入」复用 —— 映射配置直接预填新映射任务，数据资产复制到目标任务。</p>
+        </div>
+        <form id="asset-search-form" class="panel">
+          <div class="grid">
+            <label>关键词 <input type="text" name="q" placeholder="如：设备字段映射 / 零售库存"></label>
+            <label>资产类型
+              <select name="kind">
+                <option value="">全部</option>
+                <option value="mapping_config">字段映射配置</option>
+                <option value="eval_set">评测集</option>
+                <option value="kb_chunks">知识库分块</option>
+                <option value="cleaning_rules">清洗规则</option>
+                <option value="quality_report">质量报告</option>
+                <option value="diagnosis_plan">诊断方案</option>
+                <option value="doc_package">文档包</option>
+              </select>
+            </label>
+            <label>标签（逗号分隔） <input type="text" name="tags" placeholder="如：字段映射"></label>
+            <label>客户 <input type="text" name="customer" placeholder="如：某汽车制造厂"></label>
+          </div>
+          <button type="submit">检索资产</button>
+          <button id="asset-list-refresh" type="button" class="ghost" style="margin-left:8px">列出全部</button>
+        </form>
+        <div id="asset-search-result" class="result"></div>
+      </section>
+    </main>
+  </div>
+
+  <script src="/app.js"></script>
+  <script>
+    /* 仅辅助：移动端侧边栏开合（不触碰 app.js 业务逻辑） */
+    (function () {
+      var toggle = document.getElementById("menu-toggle");
+      var scrim = document.querySelector(".sidebar-scrim");
+      if (toggle) {
+        toggle.addEventListener("click", function () {
+          document.body.classList.toggle("sidebar-open");
+        });
+      }
+      if (scrim) {
+        scrim.addEventListener("click", function () {
+          document.body.classList.remove("sidebar-open");
+        });
+      }
+      document.querySelectorAll(".nav-item").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          document.body.classList.remove("sidebar-open");
+        });
+      });
+    })();
+  </script>
+</body>
+</html>

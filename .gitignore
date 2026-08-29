@@ -1,0 +1,54 @@
+# 环境变量（含密钥）
+.env
+
+# Python
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+.venv/
+*.egg-info/
+dist/
+build/
+
+# 日志
+logs/
+*.log
+
+# 测试
+.pytest_cache/
+.coverage
+htmlcov/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+
+# 数据库
+*.db
+*.sqlite
+
+# 临时文件
+tmp/
+temp/
+# 注意：notes/（项目决策记录 T-xxx）是归档内容，需提交，不忽略
+
+# 示例运行产物
+annotation_pool.json
+eval_set*.json
+dashboard.json
+crop_plan.json
+diagnosis_report.json
+project_assets.json
+cleaned_data.json
+quality_report.json
+cleaning_stats.json
+
+# 发布脚本版本记录
+.release_prev_version
