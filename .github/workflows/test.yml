@@ -1,0 +1,33 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+          cache: pip
+
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r requirements.txt
+
+      # 语义去重测试首次会下载 ChromaDB 默认嵌入模型（all-MiniLM-L6-v2，约 79MB）
+      # 缓存该模型目录，避免每次 CI 重新下载
+      - name: Cache Chroma ONNX model
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/chroma
+          key: chroma-onnx-v1
+
+      - name: Run tests
+        run: pytest tests/ -q

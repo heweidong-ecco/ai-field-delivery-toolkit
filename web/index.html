@@ -573,6 +573,11 @@
           document.body.classList.remove("sidebar-open");
         });
       });
+      // ?tab=tab-xxx 深链：页面加载即跳到指定标签页（可分享链接 / 截图用）
+      var tabParam = new URLSearchParams(location.search).get("tab");
+      if (tabParam && document.getElementById(tabParam)) {
+        gotoTab(tabParam);
+      }
     })();
   </script>
 </body>

@@ -10,6 +10,7 @@
 [![Python](https://img.shields.io/badge/python-3.11-blue)](pyproject.toml)
 [![接口](https://img.shields.io/badge/API-FastAPI-009688)](docs/api.md)
 
+**简体中文** · [English](./README.en.md)
 
 </div>
 
@@ -37,6 +38,26 @@
 | 🏷 **界面** | 11 个标签页的 FDE 操作台（Ant Design Pro 企业风格），零构建、纯 HTML/CSS/JS、离线可用 |
 
 > 细节以 [docs/api.md](docs/api.md)（接口全量）与 [docs/统一底座架构设计.md](docs/统一底座架构设计.md)（设计期权威）为准。
+
+---
+
+## 界面截图
+
+**需求诊断**
+
+![需求诊断](docs/screenshots/home.png)
+
+**数据作战流**
+
+![数据作战流](docs/screenshots/dataprep.png)
+
+**项目作战台**
+
+![项目作战台](docs/screenshots/warroom.png)
+
+**资产库**
+
+![资产库](docs/screenshots/assets.png)
 
 ---
 
